@@ -310,3 +310,10 @@ img.animal-portrait { object-fit: cover; object-position: center 42%; }
   .gesture-track[data-gesture=pour]:active { animation: pour-hold .54s linear forwards; }
   @keyframes pour-hold { from { box-shadow: inset 0 -2px 0 var(--gold); } to { box-shadow: inset 0 -8px 0 var(--gold); } }
 }
+
+.title-logo { display: block; width: min(100%, 730px); max-height: 26svh; object-fit: contain; margin-inline: auto; }
+.home-content h1 { width: 100%; }
+.language-choices { display: inline-flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+.language-choices button { min-height: 44px; border: 1px solid #99b89475; }
+.language-choices button[aria-pressed=true] { background: var(--gold); color: #20231a; border-color: var(--gold); }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; clip-path: inset(50%); overflow: hidden; white-space: nowrap; }

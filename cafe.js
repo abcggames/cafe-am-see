@@ -61,7 +61,7 @@ const text = {
     today: 'Today’s café', servedLabel: 'Served', lost: 'Left', revenue: 'Revenue',
     saveReady: 'Progress saves automatically.', saveDone: 'Progress saved.', saveFailed: 'Could not save. Will retry after your next action.',
     reset: 'New game', resetTitle: 'Start a new café?', resetBody: 'Starting over replaces your current progress.', resetYes: 'Start over',
-    cancel: 'Cancel', okay: 'Got it', switch: 'Deutsch', audioOn: 'Sound effects: on', audioOff: 'Sound effects: off',
+    cancel: 'Cancel', okay: 'Got it', audioOn: 'Sound effects: on', audioOff: 'Sound effects: off',
     audioPlatformOff: 'Sound muted by YouTube', platformPaused: 'Game paused by YouTube',
     music: 'Music', musicFile: 'Choose your audio file', musicVolume: 'Music volume',
     musicPlay: 'Play music', musicPause: 'Pause music', musicError: 'Could not play this audio file.',
@@ -132,7 +132,7 @@ const text = {
     today: 'Heutiger Betrieb', servedLabel: 'Bedient', lost: 'Gegangen', revenue: 'Umsatz',
     saveReady: 'Fortschritt wird automatisch gespeichert.', saveDone: 'Fortschritt gespeichert.', saveFailed: 'Speichern fehlgeschlagen. Neuer Versuch bei der nächsten Aktion.',
     reset: 'Neues Spiel', resetTitle: 'Ein neues Café eröffnen?', resetBody: 'Beim Neustart wird dein bisheriger Fortschritt ersetzt.', resetYes: 'Neu beginnen',
-    cancel: 'Abbrechen', okay: 'Verstanden', switch: 'English', audioOn: 'Spieltöne: an', audioOff: 'Spieltöne: aus',
+    cancel: 'Abbrechen', okay: 'Verstanden', audioOn: 'Spieltöne: an', audioOff: 'Spieltöne: aus',
     audioPlatformOff: 'Ton durch YouTube stummgeschaltet', platformPaused: 'Spiel durch YouTube pausiert',
     music: 'Musik', musicFile: 'Eigene Audiodatei wählen', musicVolume: 'Musiklautstärke',
     musicPlay: 'Musik abspielen', musicPause: 'Musik pausieren', musicError: 'Diese Audiodatei konnte nicht abgespielt werden.',
@@ -273,6 +273,7 @@ const STOCK_LIMIT = 99;
 const HISTORY_LIMIT = 90;
 const MAX_TABLES = 6;
 const SAVE_KEY = 'lakeside-cafe-v1';
+const supportedLanguages = new Set(['de', 'en']);
 const protocol = globalThis.ytgame;
 const hosted = protocol?.IN_PLAYABLES_ENV === true;
 const node = id => document.getElementById(id);
@@ -895,7 +896,7 @@ function renderSummary() {
   for (const [id, key] of [
     ['brand', 'title'], ['tagline', 'tagline'], ['counter-title', 'guestbook'],
     ['goal-label', 'goal'], ['stats-title', 'today'], ['help-button', 'help'], ['chapter-list-button', 'chapterList'],
-    ['language', 'switch'], ['reset', 'reset'], ['platform-pause-text', 'platformPaused']
+    ['reset', 'reset'], ['platform-pause-text', 'platformPaused']
   ]) set(id, t(key));
   node('metrics').innerHTML = metric(t('day'), state.day) + metric(t('silver'), state.coins) + metric(t('reputation'), state.reputation + ' / 100') + metric(t('gold'), state.gold);
   set('table-count', t('tableCount', occupiedTables().size, capacity()));
@@ -1207,9 +1208,9 @@ function displaySaveStatus(key) {
   if (!platformPause && started) set('save-status', t(key));
 }
 
-function queueSave() {
+function queueSave(preferencesOnly = false) {
   autosaveElapsed = 0;
-  const snapshot = JSON.stringify(state);
+  const snapshot = JSON.stringify(preferencesOnly ? { language: lang } : { ...state, language: lang });
   if (!hosted) {
     try {
       localStorage.setItem(SAVE_KEY, snapshot);
@@ -1361,11 +1362,6 @@ game.addEventListener('click', event => {
       playEffect('click');
       showDialog(item.dataset.act);
       break;
-    case 'language':
-      playEffect('click');
-      lang = lang === 'en' ? 'de' : 'en';
-      render();
-      break;
     case 'sound':
       if (!platformAudio) break;
       sound = !sound;
@@ -1505,12 +1501,53 @@ function deadline(promise, ms) {
   ]).finally(() => clearTimeout(timeout));
 }
 
-function revealGame() {
-  if (started || platformPause) return;
+function renderLanguageChoices() {
   document.documentElement.lang = lang;
   document.title = t('title');
-  set('home-title', t('title'));
+  for (const group of document.querySelectorAll('[data-language-group]')) {
+    group.setAttribute('aria-label', lang === 'de' ? 'Sprache' : 'Language');
+    for (const button of group.querySelectorAll('[data-locale]')) {
+      button.setAttribute('aria-pressed', String(button.dataset.locale === lang));
+    }
+  }
+}
+
+function renderStartScreen() {
+  set('home-title-text', t('title'));
+  const titleLogo = node('title-logo');
+  const image = art('title-' + lang);
+  if (titleLogo.getAttribute('src') !== image) {
+    titleLogo.hidden = true;
+    node('home-title-text').classList.remove('sr-only');
+    titleLogo.setAttribute('src', image);
+  }
   set('start-cafe', t(resumedGame ? 'continueGame' : 'startGame'));
+  renderLanguageChoices();
+}
+
+node('title-logo').addEventListener('load', () => {
+  node('title-logo').hidden = false;
+  node('home-title-text').classList.add('sr-only');
+});
+node('title-logo').addEventListener('error', () => {
+  node('title-logo').hidden = true;
+  node('home-title-text').classList.remove('sr-only');
+});
+for (const button of document.querySelectorAll('[data-locale]')) {
+  button.addEventListener('click', () => {
+    const language = button.dataset.locale;
+    if (!started || platformPause || dialog.open || !supportedLanguages.has(language) || lang === language) return;
+    lang = language;
+    playEffect('click');
+    renderStartScreen();
+    if (gameEntered) render();
+    queueSave(!gameEntered && !resumedGame);
+  });
+}
+
+function revealGame() {
+  if (started || platformPause) return;
+  renderStartScreen();
   set('music-status', 'Seeruhe');
   updateAudioControl();
   showArt('studio-logo', 'studio');
@@ -1550,7 +1587,8 @@ async function prepareGame() {
     if (raw) {
       try {
         const saved = JSON.parse(raw);
-        const restored = restore(saved);
+        if (supportedLanguages.has(saved?.language)) lang = saved.language;
+        const restored = saved && Object.hasOwn(saved, 'day') ? restore(saved) : null;
         if (restored) {
           state = restored;
           resumedGame = true;
@@ -1596,6 +1634,7 @@ requestAnimationFrame(() => {
       lang = 'de';
     }
     document.querySelector('.splash h1').textContent = t('title');
+    set('loading', t('loading'));
     await prepareGame();
   });
 });

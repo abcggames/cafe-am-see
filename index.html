@@ -16,14 +16,21 @@
       <h1>Café by the Lake</h1>
       <p id="loading" role="status">Opening the café…</p>
       <button id="retry" type="button" hidden></button>
-      <noscript>JavaScript is required to play.</noscript>
+      <noscript><span lang="de">Zum Spielen ist JavaScript erforderlich.</span> <span lang="en">JavaScript is required to play.</span></noscript>
     </div>
   </main>
   <main class="home-screen" id="home-screen" aria-labelledby="home-title" hidden>
     <div class="home-content">
       <img id="studio-logo" class="studio-logo" alt="abcGgames">
-      <h1 id="home-title"></h1>
+      <h1 id="home-title">
+        <span id="home-title-text"></span>
+        <img id="title-logo" class="title-logo" alt="" hidden>
+      </h1>
       <button type="button" class="primary" id="start-cafe"></button>
+      <div class="language-choices" role="group" data-language-group>
+        <button type="button" data-locale="de" lang="de">Deutsch</button>
+        <button type="button" data-locale="en" lang="en">English</button>
+      </div>
     </div>
   </main>
   <main class="shell" id="game" hidden>
@@ -101,7 +108,10 @@
       <p id="save-status" role="status"></p>
       <div>
         <button type="button" id="help-button" data-act="help"></button>
-        <button type="button" id="language" data-act="language"></button>
+        <div class="language-choices" role="group" data-language-group>
+          <button type="button" data-locale="de" lang="de">Deutsch</button>
+          <button type="button" data-locale="en" lang="en">English</button>
+        </div>
         <button type="button" id="sound" data-act="sound"></button>
         <button type="button" id="reset" data-act="reset"></button>
       </div>
