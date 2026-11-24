@@ -56,6 +56,8 @@ const text = {
     journalStats: '{0} served · {1} left · {2} coins earned',
     goal: 'Campaign goal', chapterList: 'Chapters', chapterStatus: 'Chapter {0} · {1}',
     chapterDone: 'Completed', chapterCurrent: 'In progress', chapterLater: 'Upcoming', chapterFrom: 'From day {0}',
+    mapHint: 'Choose a stop to meet its guest and discover the local specialty.',
+    mapList: 'All chapters', mapGuest: 'Featured guest', mapSpecialty: 'Specialty',
     goalDay: 'Finish day {0}', goalRep: '{0}/{1} reputation', goalBuild: '{0}/{1} upgrades',
     goalServe: '{0}/{1} guests served', endless: 'Keep your café open', endlessBody: 'All {0} chapters are complete. Free play is open.',
     today: 'Today’s café', servedLabel: 'Served', lost: 'Left', revenue: 'Revenue',
@@ -127,6 +129,8 @@ const text = {
     journalStats: '{0} bedient · {1} gegangen · {2} Münzen Umsatz',
     goal: 'Kampagnenziel', chapterList: 'Kapitelübersicht', chapterStatus: 'Kapitel {0} · {1}',
     chapterDone: 'Abgeschlossen', chapterCurrent: 'In Arbeit', chapterLater: 'Ausstehend', chapterFrom: 'Ab Tag {0}',
+    mapHint: 'Tippe auf eine Station und entdecke ihren Tiergast und ihre Spezialität.',
+    mapList: 'Alle Kapitel', mapGuest: 'Tiergast', mapSpecialty: 'Spezialität',
     goalDay: 'Tag {0} abschließen', goalRep: '{0}/{1} Ruf', goalBuild: '{0}/{1} Ausbauten',
     goalServe: '{0}/{1} Gäste bedient', endless: 'Betreibe dein Café weiter', endlessBody: 'Alle {0} Kapitel sind abgeschlossen. Du kannst jetzt frei weiterspielen.',
     today: 'Heutiger Betrieb', servedLabel: 'Bedient', lost: 'Gegangen', revenue: 'Umsatz',
@@ -256,6 +260,18 @@ const chapters = [
   {"en":"The annual lakeside gala","de":"Die große Jahresgala","day":63,"rep":98,"builds":16,"served":560}
 ];
 const tabs = ['orders', 'pantry', 'build', 'journal'];
+const chapterStops = [
+  { x: 49, y: 23, guest: 0, dish: 'coffee' },
+  { x: 35, y: 21, guest: 1, dish: 'tart' },
+  { x: 19, y: 21, guest: 2, dish: 'cake' },
+  { x: 19, y: 84, guest: 3, dish: 'picnic' },
+  { x: 11, y: 43, guest: 6, dish: 'feast' },
+  { x: 88, y: 34, guest: 7, dish: 'honeyTea' },
+  { x: 79, y: 17, guest: 2, dish: 'strudel' },
+  { x: 17, y: 62, guest: 5, dish: 'lemonade' },
+  { x: 90, y: 52, guest: 4, dish: 'tea' },
+  { x: 83, y: 70, guest: 0, dish: 'galaMenu' },
+];
 const difficulties = {
   easy: { en: 'Relaxed', de: 'Entspannt', seconds: 100, patience: 8, pace: 1.15, cooking: 0.75 },
   normal: { en: 'Normal', de: 'Normal', seconds: 78, patience: 0, pace: 1, cooking: 1 },
@@ -1295,6 +1311,29 @@ function syncMusic(fromGesture = false) {
   });
 }
 
+function chapterStatus(index) {
+  if (index < state.chapter) return 'chapterDone';
+  return index === state.chapter ? 'chapterCurrent' : 'chapterLater';
+}
+
+function selectMapStop(index) {
+  const chapter = chapters[index];
+  const {guest, dish} = chapterStops[index];
+  const name = guests[guest][lang === 'de' ? 1 : 2];
+  for (const button of dialog.querySelectorAll('[data-map-stop]')) {
+    button.setAttribute('aria-pressed', String(Number(button.dataset.mapStop) === index));
+  }
+  node('map-stop-detail').innerHTML = `
+    <img src="${art(guestSprites[guest] + '-happy')}" alt="">
+    <div>
+      <small>${esc(t('chapterStatus', index + 1, t(chapterStatus(index))))} · ${esc(t('chapterFrom', chapter.day))}</small>
+      <h3>${esc(local(chapter))}</h3>
+      <p>${esc(t('mapGuest'))} · ${esc(name)}</p>
+      <p>${esc(t('mapSpecialty'))} · ${esc(local(recipes[dish]))}</p>
+    </div>
+    <img src="${art('dish-' + dishSprites[dish])}" alt="">`;
+}
+
 function showDialog(mode) {
   dialog.dataset.mode = mode;
   dialog.returnValue = '';
@@ -1304,14 +1343,27 @@ function showDialog(mode) {
   if (mode === 'help') body = `<ol>${text[lang].helpSteps.map(step => `<li>${esc(step)}</li>`).join('')}</ol>`;
   if (mode === 'chapter-list') {
     const list = chapters.map((chapter, index) => {
-      const status = index < state.chapter ? 'chapterDone' : index === state.chapter ? 'chapterCurrent' : 'chapterLater';
+      const status = chapterStatus(index);
       return `<li${status === 'chapterCurrent' ? ' aria-current="true"' : ''}>
         <small>${esc(t('chapterStatus', index + 1, t(status)))}</small>
         <strong>${esc(local(chapter))}</strong><small>${esc(t('chapterFrom', chapter.day))}</small></li>`;
     }).join('');
-    body = `<ol class="campaign-list">${list}</ol>`;
+    const pins = chapterStops.map(({x, y}, index) => {
+      const status = chapterStatus(index);
+      const label = t('chapterStatus', index + 1, t(status)) + ' · ' + local(chapters[index]);
+      return `<button type="button" class="map-pin" style="--x:${x}%;--y:${y}%" data-map-stop="${index}" data-status="${status}"
+        aria-label="${esc(label)}" aria-controls="map-stop-detail"${status === 'chapterCurrent' ? ' aria-current="true"' : ''}>${index + 1}</button>`;
+    }).join('');
+    body = `<p class="map-hint">${esc(t('mapHint'))}</p>
+      <div class="chapter-map" role="group" aria-label="${esc(t('chapterList'))}">
+        <img class="map-landscape" src="${art('chapter-map')}" alt="">
+        ${pins}
+      </div>
+      <div id="map-stop-detail" class="map-stop-detail" aria-live="polite" aria-atomic="true"></div>
+      <details class="chapter-text-list"><summary>${esc(t('mapList'))}</summary><ol class="campaign-list">${list}</ol></details>`;
   }
   node('dialog-body').innerHTML = body;
+  if (mode === 'chapter-list') selectMapStop(Math.min(state.chapter, chapters.length - 1));
   node('dialog-cancel').hidden = !reset;
   set('dialog-cancel', t('cancel'));
   set('dialog-confirm', t(reset ? 'resetYes' : 'okay'));
@@ -1319,6 +1371,11 @@ function showDialog(mode) {
   syncSimulation();
   renderClock();
 }
+
+dialog.addEventListener('click', event => {
+  const pin = event.target.closest('[data-map-stop]');
+  if (pin) selectMapStop(Number(pin.dataset.mapStop));
+});
 
 game.addEventListener('click', event => {
   const item = event.target.closest('button[data-act]');

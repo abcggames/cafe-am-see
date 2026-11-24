@@ -1,5 +1,5 @@
 # Café am See · Café by the Lake
 
-Ein tierisches Café-Aufbauspiel von abcGgames. Version 2.1 der Browserfassung mit deutschen und englischen Spieltexten.
+Ein tierisches Café-Aufbauspiel von abcGgames. Version 2.2 der Browserfassung mit einer interaktiven Karte für alle zehn Kapitel.
 
-A lakeside café management game by abcGgames. Choose Deutsch or English from the title screen or during play.
+A lakeside café management game by abcGgames. Discover all ten stops, guests, and specialties on the chapter map. Available in German and English.

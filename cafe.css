@@ -115,6 +115,37 @@ dialog .campaign-list { list-style: none; display: grid; gap: 6px; padding: 0; m
 .campaign-list li[aria-current=true] { border-color: var(--gold); }
 .campaign-list strong { display: block; color: var(--text); }
 .campaign-list small { color: var(--muted); font-size: .8rem; }
+#dialog[data-mode="chapter-list"] { width: min(690px, calc(100vw - 16px)); }
+#dialog[data-mode="chapter-list"] h2 { margin-bottom: 7px; }
+.map-hint { margin-bottom: 9px; font-size: .85rem; }
+.chapter-map {
+  position: relative; isolation: isolate; aspect-ratio: 4 / 3; overflow: hidden;
+  border: 1px solid #a09159; border-radius: 13px; background: #547972;
+}
+.map-landscape { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; }
+.map-pin {
+  position: absolute; left: var(--x); top: var(--y); transform: translate(-50%,-50%);
+  display: grid; place-items: center; width: 42px; height: 42px; min-height: 0; padding: 0;
+  border: 2px solid #f3ddac; border-radius: 50%; background: #362f22; color: #fff2db;
+  box-shadow: 0 3px 7px #191c16b8; font: bold 1.04rem var(--serif);
+}
+.map-pin[data-status="chapterDone"] { background: #154637; border-color: #b4dfbd; }
+.map-pin[data-status="chapterCurrent"] { background: #f3c17a; color: #2d2218; }
+.map-pin[aria-pressed="true"] { z-index: 1; outline: 3px solid white; outline-offset: 2px; }
+.map-pin:focus-visible { z-index: 2; outline: 3px dashed white; outline-offset: 3px; }
+.map-stop-detail {
+  display: grid; grid-template-columns: clamp(40px, 14%, 78px) minmax(0, 1fr) clamp(40px, 14%, 78px);
+  align-items: center; gap: 9px; margin-top: 9px; padding: 9px;
+  border: 1px solid var(--line); border-radius: 11px; background: var(--tile);
+}
+.map-stop-detail img { width: 100%; aspect-ratio: 1; border-radius: 10px; object-fit: cover; }
+.map-stop-detail h3 { margin: 3px 0 4px; font-size: 1.14rem; overflow-wrap: anywhere; }
+.map-stop-detail small { color: var(--gold); font-size: .75rem; }
+.map-stop-detail p { font-size: .78rem; }
+.chapter-text-list { margin-top: 8px; font-size: .84rem; }
+.chapter-text-list summary { padding-block: 8px; cursor: pointer; color: var(--text); }
+@media (max-width: 360px) { .map-pin { width: 34px; height: 34px; } }
+@media (max-width: 275px) { .map-pin { width: 25px; height: 25px; font-size: .82rem; } }
 .stats dl { display: flex; flex-wrap: wrap; gap: 7px 18px; margin-top: 9px; }
 .stats dl div { flex: 1 0 auto; }
 .stats dt { color: var(--muted); font-size: .76rem; }
