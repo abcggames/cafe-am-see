@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101c17">
+  <title>Café by the Lake</title>
+  <link rel="stylesheet" href="./cafe.css">
+  <script defer src="./cafe-audio.js"></script>
+  <script defer src="./cafe.js"></script>
+</head>
+<body>
+  <main class="splash" id="splash">
+    <div>
+      <span class="brand-mark" aria-hidden="true">☕</span>
+      <h1>Café by the Lake</h1>
+      <p id="loading" role="status">Opening the café…</p>
+      <button id="retry" type="button" hidden></button>
+      <noscript>JavaScript is required to play.</noscript>
+    </div>
+  </main>
+  <main class="home-screen" id="home-screen" aria-labelledby="home-title" hidden>
+    <div class="home-content">
+      <img id="studio-logo" class="studio-logo" alt="abcGgames">
+      <h1 id="home-title"></h1>
+      <button type="button" class="primary" id="start-cafe"></button>
+    </div>
+  </main>
+  <main class="shell" id="game" hidden>
+    <header class="mast">
+      <div class="identity">
+        <span class="brand-mark" aria-hidden="true">☕</span>
+        <div><h1 id="brand"></h1><p id="tagline"></p></div>
+      </div>
+      <dl class="metrics" id="metrics"></dl>
+    </header>
+
+    <div class="layout">
+      <section class="scene" id="scene" aria-labelledby="scene-title">
+        <div class="skyline">
+          <span class="weather" id="weather"></span><span class="event" id="event"></span>
+          <button type="button" id="view-toggle" data-act="switch-view" aria-controls="kitchen-visual"></button>
+        </div>
+        <div class="scene-copy">
+          <p class="eyebrow" id="chapter-name"></p>
+          <h2 id="scene-title"></h2>
+          <div id="scene-builds" class="builds"></div>
+        </div>
+        <div id="kitchen-visual" class="kitchen-visual" hidden>
+          <div class="kitchen-cast" aria-hidden="true">
+            <img class="kitchen-actor chef" id="chef-image" alt="">
+            <img class="kitchen-actor visitor" id="visitor-image" alt="" hidden>
+            <div id="kitchen-dish" class="kitchen-dish" hidden>
+              <img id="dish-image" alt="">
+              <span class="kitchen-steam"></span>
+            </div>
+          </div>
+          <div class="kitchen-copy">
+            <p class="eyebrow" id="kitchen-caption"></p>
+            <h2 id="kitchen-title"></h2>
+            <p id="kitchen-detail"></p>
+          </div>
+        </div>
+      </section>
+      <section class="counter card" aria-labelledby="counter-title">
+        <div class="counter-head">
+          <h2 id="counter-title"></h2>
+          <span class="pill" id="table-count"></span>
+        </div>
+        <nav class="tabs" aria-label="Café" id="tabs"></nav>
+        <div class="dispatch" id="dispatch">
+          <div class="difficulty-row">
+            <label for="difficulty-select" id="difficulty-label"></label>
+            <select id="difficulty-select" aria-describedby="difficulty-time"></select>
+            <small id="difficulty-time"></small>
+          </div>
+          <p id="timer-copy"></p>
+          <progress id="clock" max="100" value="0"></progress>
+          <div class="actions">
+            <button class="primary" id="advance" type="button" data-act="advance"></button>
+            <button id="pause" type="button" data-act="pause" hidden></button>
+            <button id="time-buy" class="gold-action" type="button" data-act="time-buy" hidden></button>
+          </div>
+        </div>
+        <div class="table-map" id="table-map" hidden></div>
+        <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+        <section class="content" id="content" aria-label="Orders" tabindex="-1"></section>
+      </section>
+      <section class="goal card" aria-labelledby="goal-title">
+        <div class="goal-head"><div><p class="eyebrow" id="goal-label"></p><h2 id="goal-title"></h2></div><span class="chapter-count" id="chapter-count"></span></div>
+        <ul id="goal-items" class="goal-items"></ul>
+        <button type="button" id="chapter-list-button" data-act="chapter-list"></button>
+      </section>
+      <section class="stats card" aria-labelledby="stats-title">
+        <h2 id="stats-title"></h2>
+        <dl id="stats"></dl>
+      </section>
+    </div>
+
+    <footer class="footer">
+      <p id="save-status" role="status"></p>
+      <div>
+        <button type="button" id="help-button" data-act="help"></button>
+        <button type="button" id="language" data-act="language"></button>
+        <button type="button" id="sound" data-act="sound"></button>
+        <button type="button" id="reset" data-act="reset"></button>
+      </div>
+    </footer>
+    <details id="music-settings" class="music-settings" hidden>
+      <summary id="music-label"></summary>
+      <div class="music-actions">
+        <label id="music-file-label" for="music-file"></label>
+        <input type="file" id="music-file" accept="audio/*,.wav,.mp3,.ogg,.m4a">
+        <button id="music-toggle" type="button"></button>
+        <label id="music-volume-label" for="music-volume"></label>
+        <input type="range" id="music-volume" min="0" max="100" value="35">
+        <p id="music-status" role="status"></p>
+      </div>
+      <audio id="music-track" loop preload="none"></audio>
+    </details>
+
+    <dialog id="dialog" aria-labelledby="dialog-title">
+      <h2 id="dialog-title"></h2>
+      <div id="dialog-body"></div>
+      <div class="actions dialog-actions">
+        <button type="button" id="dialog-cancel"></button>
+        <button type="button" id="dialog-confirm" class="primary"></button>
+      </div>
+    </dialog>
+  </main>
+  <div id="platform-pause" class="pause-cover" hidden><p id="platform-pause-text"></p></div>
+</body>
+</html>
