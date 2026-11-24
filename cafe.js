@@ -65,7 +65,7 @@ const text = {
     reset: 'New game', resetTitle: 'Start a new café?', resetBody: 'Starting over replaces your current progress.', resetYes: 'Start over',
     cancel: 'Cancel', okay: 'Got it', audioOn: 'Sound effects: on', audioOff: 'Sound effects: off',
     audioPlatformOff: 'Sound muted by YouTube', platformPaused: 'Game paused by YouTube',
-    music: 'Music', musicFile: 'Choose your audio file', musicVolume: 'Music volume',
+    music: 'Music', musicVolume: 'Music volume',
     musicPlay: 'Play music', musicPause: 'Pause music', musicError: 'Could not play this audio file.',
     helpSteps: [
       'Choose a difficulty before opening. Tap the preparation steps in order, then serve the dish. Use Show recipe if you get stuck. Quick service earns a tip.',
@@ -138,7 +138,7 @@ const text = {
     reset: 'Neues Spiel', resetTitle: 'Ein neues Café eröffnen?', resetBody: 'Beim Neustart wird dein bisheriger Fortschritt ersetzt.', resetYes: 'Neu beginnen',
     cancel: 'Abbrechen', okay: 'Verstanden', audioOn: 'Spieltöne: an', audioOff: 'Spieltöne: aus',
     audioPlatformOff: 'Ton durch YouTube stummgeschaltet', platformPaused: 'Spiel durch YouTube pausiert',
-    music: 'Musik', musicFile: 'Eigene Audiodatei wählen', musicVolume: 'Musiklautstärke',
+    music: 'Musik', musicVolume: 'Musiklautstärke',
     musicPlay: 'Musik abspielen', musicPause: 'Musik pausieren', musicError: 'Diese Audiodatei konnte nicht abgespielt werden.',
     helpSteps: [
       'Wähle vor der Öffnung die Schwierigkeit. Tippe die Zubereitungsschritte der Reihe nach an und serviere dann. Bei Bedarf hilft „Rezept ansehen“. Schneller Service bringt Trinkgeld.',
@@ -324,7 +324,6 @@ const cafeAudio = new CafeAudio();
 const musicTrack = node('music-track');
 let musicRequested = Boolean(CAFE_MUSIC_SRC);
 let musicNeedsGesture = false;
-let musicObjectUrl = '';
 let musicGain = null;
 if (CAFE_MUSIC_SRC) musicTrack.src = CAFE_MUSIC_SRC;
 
@@ -1209,10 +1208,7 @@ function updateAudioControl() {
   node('sound').disabled = !platformAudio;
   node('sound').setAttribute('aria-pressed', String(sound && platformAudio));
   node('music-settings').hidden = hosted && !CAFE_MUSIC_SRC;
-  node('music-file').hidden = hosted;
-  node('music-file-label').hidden = hosted;
   set('music-label', t('music'));
-  set('music-file-label', t('musicFile'));
   set('music-volume-label', t('musicVolume'));
   set('music-toggle', t(musicRequested ? 'musicPause' : 'musicPlay'));
   node('music-toggle').disabled = !platformAudio || !musicTrack.getAttribute('src');
@@ -1471,19 +1467,6 @@ node('difficulty-select').addEventListener('change', event => {
   }
 });
 
-node('music-file').addEventListener('change', event => {
-  const file = event.target.files?.[0];
-  if (hosted || !file) return;
-  musicTrack.pause();
-  if (musicObjectUrl) URL.revokeObjectURL(musicObjectUrl);
-  musicObjectUrl = URL.createObjectURL(file);
-  musicTrack.src = musicObjectUrl;
-  musicRequested = true;
-  musicNeedsGesture = false;
-  set('music-status', file.name);
-  updateAudioControl();
-  syncMusic(true);
-});
 node('music-toggle').addEventListener('click', () => {
   if (!platformAudio || !musicTrack.getAttribute('src')) return;
   musicRequested = !musicRequested;

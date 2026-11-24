@@ -317,7 +317,6 @@ img.animal-portrait { object-fit: cover; object-position: center 42%; }
 .music-actions label, .music-actions p { font-size: .85rem; color: var(--muted); overflow-wrap: anywhere; }
 .music-actions input { min-width: 0; max-width: 100%; }
 .music-actions input[type=range] { min-height: 40px; accent-color: var(--gold); }
-.music-actions input[type=file] { min-height: 42px; color: var(--text); }
 .music-actions p:empty { display: none; }
 
 .metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }
